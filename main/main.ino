@@ -4,6 +4,9 @@
 #define SLAVE_ADDRESS 0x04
 int number = 0;
 int state = 0;
+float power = 12345.67;
+
+#define GET_BYTE_1 = 1;
 
 void setup() {
 pinMode(13, OUTPUT);
@@ -46,5 +49,25 @@ state = 0;
 
 // callback for sending data
 void sendData(){
-Wire.write(number);
+
+//int pint = (int)power;
+long pint = static_cast<long>(power);
+
+
+byte byte1 = pint >> 24; // gets msb
+byte byte2 = pint >> 16; // gets msb
+byte byte3 = pint >> 8; // gets msb
+byte byte4 = pint; // gets lsb
+
+Serial.println(power);
+Serial.println(pint);
+Serial.println("Bytes below");
+Serial.println(byte1);
+Serial.println(byte2);
+Serial.println(byte3);
+Serial.println(byte4);
+Wire.write(byte1);
+Wire.write(byte2);
+Wire.write(byte3);
+Wire.write(byte4);
 }
