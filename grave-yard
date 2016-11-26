@@ -1,0 +1,17 @@
+int sensorValue = analogRead(A0);
+  int current_reading = analogRead(A1);
+
+	float ac_voltage = sensorValue * (10.0/1023.0);
+ 	ac_voltage = (ac_voltage - 5.0);
+	ac_voltage = ac_voltage * 110.190;
+	float current = current_reading*currentVoltageConstant1;
+
+  delay(750);
+	Serial.print(" Voltage: ");
+  Serial.print(ac_voltage);
+	Serial.print(" Current: ");
+	Serial.print(current);
+	Serial.print(" Power: ");
+	Serial.print(current * ac_voltage);
+	Serial.print(" CS-val: ");
+	Serial.println(sensorValue);
