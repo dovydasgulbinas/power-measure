@@ -1,21 +1,50 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include  <TimerOne.h>
 
-// measurment constants
-const float refVoltage = 4.44;
-const float currentConstant1 = 0.1;// V:A
-const float currentConstant2 = 0.066;// V:A
-const float currentVoltageConstant1 = refVoltage/(1024*currentConstant1);
-const float currentVoltageConstant2 = refVoltage/(1024*currentConstant2);
-
-// Pins in use
-
+#define SLAVE_ADDRESS 0x04
+int number = 0;
+int state = 0;
 
 void setup() {
-  Serial.begin(9600);
+pinMode(13, OUTPUT);
+Serial.begin(9600); // start serial for output
+// initialize i2c as slave
+Wire.begin(SLAVE_ADDRESS);
+
+// define callbacks for i2c communication
+Wire.onReceive(receiveData);
+Wire.onRequest(sendData);
+
+Serial.println("Ready!");
 }
 
 void loop() {
+delay(100);
+}
 
+// callback for received data/
+void receiveData(int byteCount){
+
+while(Wire.available()) {
+number = Wire.read();
+Serial.print("data received: ");
+Serial.println(number);
+
+if (number == 1){
+
+if (state == 0){
+digitalWrite(13, HIGH); // set the LED on
+state = 1;
+}
+else{
+digitalWrite(13, LOW); // set the LED off
+state = 0;
+}
+}
+}
+}
+
+// callback for sending data
+void sendData(){
+Wire.write(number);
 }
