@@ -70,10 +70,10 @@ byte byte4 = pint; // gets lsb
 Serial.println(power);
 Serial.println(pint);
 Serial.println("Bytes below");
-Serial.println(byte1);
-Serial.println(byte2);
-Serial.println(byte3);
-Serial.println(byte4);
+// Serial.println(byte1);
+// Serial.println(byte2);
+// Serial.println(byte3);
+// Serial.println(byte4);
 Wire.write(byte1);
 Wire.write(byte2);
 Wire.write(byte3);
