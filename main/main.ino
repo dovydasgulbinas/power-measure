@@ -54,7 +54,6 @@ void loop() {
         Serial.print(" CS-val: ");
         Serial.println(sensorValue);
 
-
         delay(1000);
 }
 
