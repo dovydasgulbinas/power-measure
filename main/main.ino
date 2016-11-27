@@ -21,7 +21,6 @@ const int period = 1000/n_samples;
 const int rms_samples = 40;
 
 
-int rms_counter = 0;
 float volt_list[rms_samples] = {0};
 float current_list[rms_samples]= {0};
 
@@ -30,6 +29,8 @@ int voltage_reading = 0;
 
 float idle_hall = 0;
 float current_constant = 0.66;
+
+int cmd = 0;
 
 int getHallAverage(byte analogPin, byte nSamples){//this function returns mean value o a current sensor
 								long sum = 0;
@@ -101,7 +102,9 @@ void loop() {
 
         }
 
-
+if(number == OFF){
+	power = 0.0;
+}
 
 }
 
