@@ -14,11 +14,9 @@ int relay_pin = 12;
 
 const float refVoltage = 4.44;
 const float currentConstant1 = 0.1;// V:A
-const float currentConstant2 = 0.066;// V:A
 const float currentVoltageConstant1 = refVoltage/(1024*currentConstant1);
-const float currentVoltageConstant2 = refVoltage/(1024*currentConstant2);
 
-const int n_samples = 10;
+const int n_samples = 10; //samples per second
 const int period = 1000/n_samples;
 const int rms_samples = 40;
 
@@ -30,14 +28,33 @@ float current_list[rms_samples]= {0};
 int current_reading = 0;
 int voltage_reading = 0;
 
+float idle_hall = 0;
+float current_constant = 0.66;
+
+int getHallAverage(byte analogPin, byte nSamples){//this function returns mean value o a current sensor
+								long sum = 0;
+								for(byte i=0; i<nSamples; i++) {
+																sum = sum + analogRead(analogPin);
+																delay(1);// makes sure ADC refreshes
+								}
+								sum = sum/nSamples;
+								return sum;
+}
+
 float convert_to_volts(int voltage_reading){
         float ac_voltage = voltage_reading * (10.0/1023.0);
         ac_voltage = (ac_voltage - 5.0);
         ac_voltage = ac_voltage * 110.190;
 
-  return ac_voltage;
+        return ac_voltage;
 }
 
+float convert_to_amps(int current_reading){
+        float ac_current = 0;
+				ac_current = currentConstant1 * (current_reading - idle_hall);
+
+        return ac_current;
+}
 
 void setup() {
         pinMode(13, OUTPUT);
@@ -53,43 +70,38 @@ void setup() {
         Wire.onRequest(sendData);
 
         Serial.println("Ready!");
+        idle_hall = getHallAverage(A0, 70);
+        Serial.print("Idle hall");
+        Serial.print(idle_hall);
 }
 
 void loop() {
         if((millis()%period)==0) {
 
                 float rms_voltage = 0.0;
-                for(byte i = 0; i<rms_samples; i++){
-                volt_list[i] =  convert_to_volts(analogRead(0));
-                rms_voltage += volt_list[i]*volt_list[i];
-                current_list[i] = analogRead(A1);
+                float rms_current = 0.0;
+
+                for(byte i = 0; i<rms_samples; i++) {
+                        volt_list[i] =  convert_to_volts(analogRead(A0));
+                        rms_voltage += volt_list[i]*volt_list[i];
+                        // curretn measurment
+                        current_list[i] = convert_to_amps(analogRead(A1));
+                        rms_current = current_list[i]*current_list[i];
                 }
                 rms_voltage = rms_voltage/rms_samples;
                 rms_voltage = sqrt(rms_voltage);
 
-                Serial.print("new Voltage");
-                Serial.println(rms_voltage);
-                }
+                rms_current = rms_current/rms_samples;
+                rms_current = sqrt(rms_current);
+
+                Serial.print(rms_voltage);
+                Serial.print(rms_current);
+								power = rms_current * rms_voltage;
+								Serial.println(power);
+
+        }
 
 
-        //###########
-
-        // float ac_voltage = voltage_reading * (10.0/1023.0);
-        // ac_voltage = (ac_voltage - 5.0);
-        // ac_voltage = ac_voltage * 110.190;
-        // float current = current_reading*currentVoltageConstant2 -1.71;
-        // power = abs(current * ac_voltage);
-        //
-        // Serial.print(" Voltage: ");
-        // Serial.print(ac_voltage);
-        // Serial.print(" Current: ");
-        // Serial.print(current);
-        // Serial.print(" Power: ");
-        // Serial.print(power);
-        // Serial.print(" CS-val: ");
-        // Serial.println(voltage_reading);
-
-//dont change lines here
 
 }
 
