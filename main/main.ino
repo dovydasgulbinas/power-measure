@@ -18,6 +18,26 @@ const float currentConstant2 = 0.066;// V:A
 const float currentVoltageConstant1 = refVoltage/(1024*currentConstant1);
 const float currentVoltageConstant2 = refVoltage/(1024*currentConstant2);
 
+const int n_samples = 10;
+const int period = 1000/n_samples;
+const int rms_samples = 40;
+
+
+int rms_counter = 0;
+float volt_list[rms_samples] = {0};
+float current_list[rms_samples]= {0};
+
+int current_reading = 0;
+int voltage_reading = 0;
+
+float convert_to_volts(int voltage_reading){
+        float ac_voltage = voltage_reading * (10.0/1023.0);
+        ac_voltage = (ac_voltage - 5.0);
+        ac_voltage = ac_voltage * 110.190;
+
+  return ac_voltage;
+}
+
 
 void setup() {
         pinMode(13, OUTPUT);
@@ -36,25 +56,41 @@ void setup() {
 }
 
 void loop() {
-        int sensorValue = analogRead(A0);
-        int current_reading = analogRead(A1);
+        if((millis()%period)==0) {
 
-        float ac_voltage = sensorValue * (10.0/1023.0);
-        ac_voltage = (ac_voltage - 5.0);
-        ac_voltage = ac_voltage * 110.190;
-        float current = current_reading*currentVoltageConstant2 -1.71;
-        power = abs(current * ac_voltage);
+                float rms_voltage = 0.0;
+                for(byte i = 0; i<rms_samples; i++){
+                volt_list[i] =  convert_to_volts(analogRead(0));
+                rms_voltage += volt_list[i]*volt_list[i];
+                current_list[i] = analogRead(A1);
+                }
+                rms_voltage = rms_voltage/rms_samples;
+                rms_voltage = sqrt(rms_voltage);
 
-        Serial.print(" Voltage: ");
-        Serial.print(ac_voltage);
-        Serial.print(" Current: ");
-        Serial.print(current);
-        Serial.print(" Power: ");
-        Serial.print(power);
-        Serial.print(" CS-val: ");
-        Serial.println(sensorValue);
+                Serial.print("new Voltage");
+                Serial.println(rms_voltage);
+                }
 
-        delay(1000);
+
+        //###########
+
+        // float ac_voltage = voltage_reading * (10.0/1023.0);
+        // ac_voltage = (ac_voltage - 5.0);
+        // ac_voltage = ac_voltage * 110.190;
+        // float current = current_reading*currentVoltageConstant2 -1.71;
+        // power = abs(current * ac_voltage);
+        //
+        // Serial.print(" Voltage: ");
+        // Serial.print(ac_voltage);
+        // Serial.print(" Current: ");
+        // Serial.print(current);
+        // Serial.print(" Power: ");
+        // Serial.print(power);
+        // Serial.print(" CS-val: ");
+        // Serial.println(voltage_reading);
+
+//dont change lines here
+
 }
 
 // callback for received data/
